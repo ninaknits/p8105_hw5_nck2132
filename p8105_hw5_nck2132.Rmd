@@ -70,3 +70,42 @@ birthday_sim_df |>
   )
 ```
 Plotting the probability of sharing the same birthday as a function of group size is a signmoidal curve. Generally the probability of sharing a birthday increases as group size increases peaking at almost 1 or 100% when group size is 50. 
+
+## Q2
+```{r}
+full_df =
+  tibble(
+    files = list.files("data/"),
+    path = str_c("data/", files)
+  ) |>
+  mutate(data = purrr::map(path, read_csv)) |> 
+  unnest(data) |>
+  mutate(files = str_remove(files, ".csv")) |>
+  separate(files, into = c("arm_type", "subject_id"), sep = "_") |> 
+  mutate(
+    arm_type = case_match(
+      arm_type,
+      "con" ~ "control",
+      "exp" ~ "experimental"
+    )) |> 
+  pivot_longer(
+  starts_with("week_"),
+  names_to = "week",
+  names_prefix = "week_",
+  values_to = "observation"
+)
+```
+Plot 
+
+```{r}
+full_df |>  
+  ggplot(aes(x = week, y = observation, group = arm_type, color = arm_type)) + 
+  geom_point() + 
+  geom_path() + 
+  facet_grid(~arm_type) +
+labs(title = "Observations over 8 Weeks by Study Arm")
+```
+
+Based on the two graphs observations in the control arm appear to stay relatively constant over the 8 weeks and the range of data is between -2.5 and 5.0. In comparison, observations in the experimental arm increase over the 8 week period. The start of the data range at week 1 is -1.25 to 3.75 but by week 8 this range shifts upwards to 2.5 to 7.5. This highlights how observational values increase over the 8 week period in the experimental arm where as is in the control arm they stay relatively consistent over time, which potentially suggests experimental treatment the trend increase in observations.
+
+
