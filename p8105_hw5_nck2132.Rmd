@@ -100,15 +100,14 @@ Plot
 
 ```{r}
 full_df |>  
-  ggplot(aes(x = week, y = observation, group = arm_type, color = arm_type)) + 
+  ggplot(aes(x = week, y = observation, group = subject_id, color = arm_type)) + 
   geom_point() + 
   geom_path() + 
   facet_grid(~arm_type) +
 labs(title = "Observations over 8 Weeks by Study Arm")
 ```
 
-Based on the two graphs observations in the control arm appear to stay relatively constant over the 8 weeks and the range of data is between -2.5 and 5.0. In comparison, observations in the experimental arm increase over the 8 week period. The start of the data range at week 1 is -1.25 to 3.75 but by week 8 this range shifts upwards to 2.5 to 7.5. This highlights how observational values increase over the 8 week period in the experimental arm where as is in the control arm they stay relatively consistent over time, which potentially suggests experimental treatment the trend increase in observations.
-
+Based on the two graphs, observations in the control arm appear to stay relatively constant over the 8 weeks, with values ranging between about −2.5 and 5.0. In comparison, observations in the experimental arm increase over the 8-week period. At week 1, the range is about −1 to 3.75, but by week 8 this range shifts upward to about 3.25 to 7. This highlights how observation values increase over the 8 weeks in the experimental arm, whereas in the control arm they stay relatively consistent over time, which suggests the experimental treatment is associated with an increase in observations.
 
 ```{r}
 sim = function(n = 30, mu = 0, sigma = 5) {
@@ -148,7 +147,7 @@ sim_results_df |>
   )
 ```
 
-As effect size increases from 0 to 6, the power increases as a result. The relationship between power and effect size follows a sigmoidal curve. Power ranges from just above 0 and its maximum value is 1.
+As effect size increases from 0 to 6, the power increases as a result. The relationship between power and effect size follows a sigmoidal curve. At an effect size of 0, power is about 0.05, which equals alpha, because the null is true and every rejection is a false positive. Power then rises steeply, from about 0.19 at μ = 1 to 0.56 at μ = 2 and 0.88 at μ = 3, and reaches its maximum value of 1 from about μ = 4 onward. This shows that larger effect sizes are easier to detect.
 
 ```{r}
 sim_results_df |> 
