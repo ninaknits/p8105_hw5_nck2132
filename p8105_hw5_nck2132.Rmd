@@ -10,6 +10,7 @@ output: github_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(rvest)
+set.seed(1)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -109,3 +110,68 @@ labs(title = "Observations over 8 Weeks by Study Arm")
 Based on the two graphs observations in the control arm appear to stay relatively constant over the 8 weeks and the range of data is between -2.5 and 5.0. In comparison, observations in the experimental arm increase over the 8 week period. The start of the data range at week 1 is -1.25 to 3.75 but by week 8 this range shifts upwards to 2.5 to 7.5. This highlights how observational values increase over the 8 week period in the experimental arm where as is in the control arm they stay relatively consistent over time, which potentially suggests experimental treatment the trend increase in observations.
 
 
+```{r}
+sim = function(n = 30, mu = 0, sigma = 5) {
+  
+  sim_data = tibble(
+    x = rnorm(n, mean = mu, sd = sigma)
+  )
+  
+  sim_data |> 
+    pull(x) |> 
+    t.test(mu = 0) |> 
+    broom::tidy() |> 
+    select(mu_hat = estimate, p_value = p.value)
+}
+sim_results_df = 
+  expand_grid(
+    true_mu = 0:6,
+    iter = 1:5000
+  ) |> 
+  mutate(output = map(true_mu, \(m) sim(mu = m))) |>  
+  unnest(output)
+```
+
+Plot 
+
+```{r}
+sim_results_df |> 
+  group_by(true_mu) |> 
+  summarize(power = mean(p_value < 0.05)) |> 
+  ggplot(aes(x = true_mu, y = power)) +
+  geom_point() +
+  geom_line() +
+  labs(
+    title = "Power of a One-Sample T-test by True Mean",
+    x = "True μ",
+    y = "Power"
+  )
+```
+
+As effect size increases from 0 to 6, the power increases as a result. The relationship between power and effect size follows a sigmoidal curve. Power ranges from just above 0 and its maximum value is 1.
+
+```{r}
+sim_results_df |> 
+  group_by(true_mu) |> 
+  summarize(
+    all_samples = mean(mu_hat),
+    rejected_only = mean(mu_hat[p_value < 0.05])
+  ) |> 
+  pivot_longer(
+    -true_mu,
+    names_to = "samples",
+    values_to = "avg_mu_hat"
+  ) |> 
+  ggplot(aes(x = true_mu, y = avg_mu_hat, color = samples)) +
+  geom_point() +
+  geom_line() +
+  labs(
+    title = "Average μ̂ vs. True μ: All vs. Rejected Samples",
+    x = "True μ",
+    y = "Average μ̂",
+    color = "Samples"
+  )
+```
+For true mu values above 4, the sample average of mu hat across tests for which the null is rejected is approximately equal to the true value of mu but before true mu values of 5 this is not the case. In the graph, this is where the yellow and purple lines meet. For smaller true mu values (1–3), it is not equal: the average of mu hat for rejected tests is higher than the true mu.
+
+This is because when the true mu is smaller, more values fall below the cutoff point of significance, so the test only rejects the samples that happened to have a high estimate of mu This makes their average too high. When the true mu is higher, fewer values fall below the cutoff point of significance, so almost all samples are rejected (power is close to 1), and the average of the rejected samples is about the same as the average of all samples, which equals the true mu.
