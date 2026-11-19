@@ -2,6 +2,7 @@
 title: "Data Science 1: HW5"
 subtitle: "Homework"
 date: "2026-11-17"
+name: "Nina Knitowski"
 output: github_document
 
 ---
@@ -65,12 +66,12 @@ birthday_sim_df |>
   geom_point() +
   geom_line() +
   labs(
-    title = "Probability that at Least Two People Share a Birthday",
+    title = "Probab that 2+ People Share a Birthday by Group Size ",
     x = "Group Size",
     y = "Probability of a Shared Birthday"
   )
 ```
-Plotting the probability of sharing the same birthday as a function of group size is a signmoidal curve. Generally the probability of sharing a birthday increases as group size increases peaking at almost 1 or 100% when group size is 50. 
+Plotting the probability of sharing the same birthday as a function of group size results in a signmoidal curve. Generally the probability of sharing a birthday increases as group size increases peaking at almost 1 or 100% when group size is 50.The steepest increase in probability of atleast two people sharing a birthday is between group size 10 to 30 people. 
 
 ## Q2
 ```{r}
@@ -171,6 +172,8 @@ sim_results_df |>
     color = "Samples"
   )
 ```
-For true mu values above 4, the sample average of mu hat across tests for which the null is rejected is approximately equal to the true value of mu but before true mu values of 5 this is not the case. In the graph, this is where the yellow and purple lines meet. For smaller true mu values (1–3), it is not equal: the average of mu hat for rejected tests is higher than the true mu.
+No the sample average of mu across tests for which the null is  rejected is not approximately equal to the true value of mu for all values of true mu. For smaller true mu values (1–3), it is not equal: the average of mu hat for rejected tests is higher than the true mu.
 
-This is because when the true mu is smaller, more values fall below the cutoff point of significance, so the test only rejects the samples that happened to have a high estimate of mu This makes their average too high. When the true mu is higher, fewer values fall below the cutoff point of significance, so almost all samples are rejected (power is close to 1), and the average of the rejected samples is about the same as the average of all samples, which equals the true mu.
+For true mu values above 4, the sample average of mu  across tests for which the null is rejected IS approximately equal to the true value of mu. In the graph, this is where the yellow and purple lines meet. 
+
+The gap between the two lines comes from how the test decides to reject. With n = 30 and σ = 5, the standard error of μ̂ is about 5/√30 ≈ 0.91. A two-sided t-test at α = 0.05 therefore needs μ̂ to land about 2 standard errors from zero, roughly 1.9, before it rejects. When the true μ is 1, a typical estimate doesn’t get that far, so the only datasets that make it into the “rejected” group are the ones that overshot. That’s why the yellow point at μ = 1 sits at about 2.25, more than double the truth. The same thing happens, less dramatically, at μ = 2 (≈ 2.6) and μ = 3 (≈ 3.2). Once μ reaches 4, almost every dataset clears the 1.9 threshold, so being rejected says little about whether a sample was unusually high. The rejected group is basically all the samples, and the two lines overlap. At μ = 0, the rejected samples split between large positive and large negative estimates. These mostly offset each other, so the yellow point (≈ 0.3) stays close to 0. In short, keeping only the significant results selects the samples that overestimated μ, and that matters most when power is low.
